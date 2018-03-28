@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'ZXFilterView_Example' do
+  pod 'ZXFilterView', :path => '../'
+
+  target 'ZXFilterView_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
