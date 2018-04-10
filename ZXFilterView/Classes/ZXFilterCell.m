@@ -1,0 +1,97 @@
+//
+//  ZXFilterCell.m
+//  Masonry
+//
+//  Created by 谢泽鑫 on 2018/3/29.
+//
+
+#import "ZXFilterCell.h"
+#import <Masonry/Masonry.h>
+#import "UIColor+RGB.h"
+#import "UIImage+Color.h"
+
+
+@implementation ZXFilterCell
+
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if ( self ){
+        self.layer.cornerRadius = 5.0;
+        self.layer.borderWidth = 0.5;
+        UIButton* buttom = [UIButton buttonWithType:UIButtonTypeCustom];
+        [buttom addTarget:self action:@selector(didClickBtn:) forControlEvents:UIControlEventTouchUpInside];
+        [buttom.titleLabel setFont:[UIFont systemFontOfSize:14]];
+        [self.contentView addSubview:(_button = buttom)];
+        [self createAutoLayout];
+        [self judgeStatus];
+    }
+    return self;
+}
+
+- (void)createAutoLayout{
+    [self.contentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(0);
+        make.right.mas_equalTo(0);
+        make.bottom.mas_equalTo(self.button.mas_bottom).offset(0);
+    }];
+    
+    [self.button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(0);
+        make.left.right.mas_equalTo(0);
+        make.bottom.mas_equalTo(0);
+    }];
+    
+}
+
+- (UICollectionViewLayoutAttributes *)preferredLayoutAttributesFittingAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes{
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+    CGSize size = [self.contentView systemLayoutSizeFittingSize:layoutAttributes.size];
+    CGRect cellFrame = layoutAttributes.frame;
+    size.width = [self calculateContentWidth];
+    cellFrame.size = size;
+    layoutAttributes.frame = cellFrame;
+    return layoutAttributes;
+}
+
+//计算title所需要的宽度
+- (CGFloat)calculateContentWidth{
+    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithObject:_button.titleLabel.font forKey:NSFontAttributeName];
+    CGSize size = [_button.titleLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, 0.0)                                             options:NSStringDrawingUsesLineFragmentOrigin
+    attributes:dic context:nil].size;
+    return size.width + 24;
+}
+
+- (void)didClickBtn:(UIButton*)sender{
+    if ( self.block ){
+        self.block(self);
+    }
+    if ( self.isSelected ){
+        self.selected = NO;
+    }else{
+        self.selected = YES;
+    }
+}
+
+
+- (void)judgeStatus{
+    if ( self.isSelected ){
+        self.backgroundColor = [UIColor colorWithR:255 G:239 B:213];
+        self.layer.borderColor = [UIColor colorWithR:255 G:153 B:0].CGColor;
+        [_button setTitleColor:[UIColor colorWithR:255 G:153 B:0] forState:UIControlStateNormal];
+    }else{
+        self.backgroundColor = [UIColor colorWithR:242 G:242 B:242];
+        self.layer.borderColor = [UIColor clearColor].CGColor;
+        [_button setTitleColor:[UIColor colorWithR:170 G:170 B:170] forState:UIControlStateNormal];
+    }
+}
+
+- (void)setSelected:(BOOL)selected{
+    [super setSelected:selected];
+    [self judgeStatus];
+}
+
+
+
+@end
