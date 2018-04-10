@@ -48,7 +48,6 @@
         self.dataSource = self;
         self.backgroundColor = [UIColor whiteColor];
         
-//        [self registerClass:[ZXFilterCell class] forCellWithReuseIdentifier:@"cell"];   //注册cell
         [self registerClass:[ZXFilterHeaderView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
         
         
@@ -89,10 +88,10 @@
         //把filterView放入maskView中
         [maskView addSubview:self];
         
-        
-
         //添加约束
         [self createAutoLayout];
+        
+
 
     }
     return self;
@@ -171,6 +170,8 @@
     [self.maskView layoutIfNeeded];
     self.maskView.hidden = YES;
     self.dict = nil;
+    self.cellIdentifierDict = nil;
+    [self reloadData];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
@@ -184,10 +185,16 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
 
+    /**
+        该段代码用于解决使用registerClass注册cell后，因重用机制，
+        导致cell每次重用时isSelected状态会被清空，特此为每个cell在地址池申请注册，
+        通过不同的identifier把cell的内存地址固定住
+        start
+     **/
     if ( _cellIdentifierDict == nil ) {
         _cellIdentifierDict = [NSMutableDictionary dictionary];
     }
-    
+
     NSString *identifier = [_cellIdentifierDict objectForKey:[NSString stringWithFormat:@"%@", indexPath]];
     
     if(identifier == nil){
@@ -196,21 +203,15 @@
         // 注册Cell
         [collectionView registerClass:[ZXFilterCell class] forCellWithReuseIdentifier:identifier];
     }
+    /************************ end ***************************/
     
     ZXFilterCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
-    
-    if ( !cell ){
-        cell = [[ZXFilterCell alloc] initWithFrame:CGRectZero];
-    }
-    
-    if ( indexPath.section == 0 && indexPath.row == 0 ){
-        NSLog(@"%p",cell);
-    }
-    
     ZXFilterViewModel* model = self.subOptions[indexPath.section];
     [cell.button setTitle:model.buttonNames[indexPath.row] forState:UIControlStateNormal];
     cell.value = model.buttonValues[indexPath.row];
     cell.indexPath = indexPath;
+    
+
     
     cell.block = ^(ZXFilterCell *filterCell) {/*选中时回调*/
         //取出filterCell.indexPath.section所对应的数据模型
@@ -297,6 +298,7 @@
 /*重新加载*/
 - (void)reload{
     self.dict = nil;
+    self.cellIdentifierDict = nil;
     [self reloadData];
     self.block(self.dict);
 }
@@ -309,6 +311,13 @@
 /*完成按钮*/
 - (void)didClickFinishBtn:(UIButton*)sender{
     [self hide];
+}
+
+
+- (void)reloadData{
+    //发送通知,告诉cell，即将重置所有按钮
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ZXFilterViewReset" object:nil];
+    [super reloadData];
 }
 
 @end

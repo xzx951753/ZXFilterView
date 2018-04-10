@@ -1,0 +1,23 @@
+PODS:
+  - Masonry (1.1.0)
+  - ZXFilterView (0.1.0):
+    - Masonry (~> 1.1.0)
+
+DEPENDENCIES:
+  - ZXFilterView (from `../`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Masonry
+
+EXTERNAL SOURCES:
+  ZXFilterView:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  ZXFilterView: 2b0af933077816d3c6302280003fcfa2f3468b90
+
+PODFILE CHECKSUM: bf140447cdcad10c2260930f55a9877fee82cbdf
+
+COCOAPODS: 1.5.0.beta.1

@@ -10,6 +10,9 @@
 #import "UIColor+RGB.h"
 #import "UIImage+Color.h"
 
+@interface ZXFilterCell()
+@property (nonatomic,assign) BOOL isReloading;
+@end
 
 @implementation ZXFilterCell
 
@@ -25,8 +28,20 @@
         [self.contentView addSubview:(_button = buttom)];
         [self createAutoLayout];
         [self judgeStatus];
+        
+        //安装重置按钮通知
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(resetNotificationHander)
+                                                     name:@"ZXFilterViewReset"
+                                                   object:nil];
     }
     return self;
+}
+
+
+- (void)resetNotificationHander{
+    //设置重置状态标识
+    _isReloading = YES;
 }
 
 - (void)createAutoLayout{
@@ -92,6 +107,12 @@
     [self judgeStatus];
 }
 
-
+/*重写prepareForReuse方法，防止cell在重用时，isSelected状态被清空*/
+- (void)prepareForReuse{
+    if ( self.isReloading ){
+        _isReloading = NO;
+        [super prepareForReuse];
+    }
+}
 
 @end
