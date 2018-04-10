@@ -109,7 +109,7 @@
     [_toolBarView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.bottom.right.mas_equalTo(0);
         make.left.equalTo(self.maskView.mas_left).offset(self.containerView.frame.size.width);
-        make.height.mas_equalTo(42);
+        make.height.mas_equalTo(45);
     }];
     
     //添加filterView约束
@@ -148,14 +148,14 @@
     [UIView animateWithDuration:0.1 animations:^{
         self.maskView.backgroundColor = [UIColor colorWithWhite:0.25 alpha:0.5];
     } completion:^(BOOL finished) {
-        [UIView animateWithDuration:1.0     /*动画时长*/
+        [UIView animateWithDuration:0.75     /*动画时长*/
                               delay:0.0     /*动画延时*/
              usingSpringWithDamping:0.75    /*弹簧效果*/
-              initialSpringVelocity:0.25    /*弹簧速度*/
+              initialSpringVelocity:0    /*弹簧速度*/
                             options:UIViewAnimationOptionLayoutSubviews
                          animations:^{
                              [self.toolBarView mas_updateConstraints:^(MASConstraintMaker *make) {
-                                 make.left.equalTo(self.maskView.mas_left).offset(self.containerView.frame.size.width*0.16);
+                                 make.left.equalTo(self.maskView.mas_left).offset(60);
                              }];
                              [self.maskView layoutIfNeeded];
                          } completion:nil];
@@ -213,7 +213,15 @@
     
 
     
-    cell.block = ^(ZXFilterCell *filterCell) {/*选中时回调*/
+    /*
+        点击子按钮时，触发该block
+     Start:
+     */
+    cell.block = ^(ZXFilterCell *filterCell) {
+        
+        //锁定重置按键
+        self.resetBtn.enabled = NO;
+        
         //取出filterCell.indexPath.section所对应的数据模型
         ZXFilterViewModel* model = self.subOptions[filterCell.indexPath.section];
 
@@ -269,7 +277,9 @@
             }
         }
         self.block(self.dict);
+        self.resetBtn.enabled = YES;
     };
+    /************ :End ************/
     return cell;
 }
 

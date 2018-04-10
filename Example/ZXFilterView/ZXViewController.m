@@ -23,15 +23,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    /******
-     生成筛选数据
-     根据ZXFilterCellModel字段，生成必要的：groupName<字符串：组名> ,
+    /*
+        生成筛选数据
+        根据ZXFilterCellModel字段，生成必要的：groupName<字符串：组名> ,
                                     buttonNames<数组：NSString类型的按钮名>
                                    buttonValues<数组：NSString类型的按钮值>
                                   isCheckBox:<布尔值：是否为复选框>
-     ********/
+     Start:
+     */
     NSMutableArray* mArray = [NSMutableArray array];        //mArray用于存储ZXFilterCellModel
-    for ( NSInteger groupCound = 0 ; groupCound < 3 ; groupCound++ ){
+    for ( NSInteger groupCound = 0 ; groupCound < 5 ; groupCound++ ){
         NSMutableDictionary* mDict = [NSMutableDictionary dictionary];
         NSMutableArray* buttonNames = [NSMutableArray array];
         NSMutableArray* buttonVals = [NSMutableArray array];
@@ -55,10 +56,13 @@
         [mArray addObject:model];
     }
     _dataArray = mArray;
-    /***************************/
+    /***********  :End *************/
     
     
-    /************创建筛选按钮***********/
+    /*
+        创建筛选按钮
+     Start:
+     */
     UIButton* btn = [UIButton buttonWithType:UIButtonTypeSystem];
     [btn setTitle:@"筛选" forState:UIControlStateNormal];
     [btn addTarget:self action:@selector(didClickFilterBtn:) forControlEvents:UIControlEventTouchUpInside];
@@ -67,21 +71,27 @@
         make.top.mas_equalTo(100);
         make.left.mas_equalTo(20);
     }];
-    /********************************/
+    /************* :End ***************/
     
     
-    /*创建筛选器，containerView是筛选菜单的父view，你希望把筛选菜单放到哪。*/
-    //创建筛选器
+    /*
+        创建筛选器，containerView是筛选菜单的父view，你希望把筛选菜单放到哪？
+        可以放到self.view 、 self.navigationController.view 、 self.tabBarController.view …………
+        最好找一个能覆盖全屏的view
+        withFilterBlock: 选中按钮触发该block， 并且把选中数据通过dict显示出来.
+     Start:
+     */
     ZXFilterView* filterView = [[ZXFilterView alloc] initWithSubOptions:self.dataArray
                                                       withContainerView:self.tabBarController.view withFilterBlock:^(NSDictionary *dict) {
                                                           NSLog(@"%@",dict);
                                                       }];
     _filterView = filterView;
-
+    /************* :End ***************/
 }
 
 
 - (void)didClickFilterBtn:(id)sender{
+    //弹出ZXFilterView
     [_filterView show];
 }
 
