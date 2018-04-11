@@ -1,5 +1,5 @@
 # ZXFilterView
-一个筛选菜单，指定一个父view参数，ZXFilterView会根据这个父view的大小一样，弹出在superView顶层。
+一个筛选菜单，指定一个父view参数，ZXFilterView会根据这个父view的大小一样，弹出在superView顶层。  
     1. ZXFilterView可以支持多个group,每个group支持多个button，按钮长度可根据title的长度自适应。  
     2. 可单独让某个group支持单选或复选。  
     3. 每选中一个button将会触发一次block回调。  
