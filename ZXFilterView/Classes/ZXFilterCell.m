@@ -10,6 +10,9 @@
 #import "UIColor+RGB.h"
 #import "UIImage+Color.h"
 
+#define MaxWidth 180.0
+#define MinWidth 30.0
+
 @interface ZXFilterCell()
 @property (nonatomic,assign) BOOL isReloading;
 @end
@@ -53,7 +56,8 @@
     
     [self.button mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(0);
-        make.left.right.mas_equalTo(0);
+        make.left.mas_equalTo(10);
+        make.right.mas_offset(-10);
         make.bottom.mas_equalTo(0);
     }];
     
@@ -75,7 +79,15 @@
     NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithObject:_button.titleLabel.font forKey:NSFontAttributeName];
     CGSize size = [_button.titleLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, 0.0)                                             options:NSStringDrawingUsesLineFragmentOrigin
     attributes:dic context:nil].size;
-    return size.width + 24;
+    CGFloat width = size.width;
+    if ( width > MaxWidth ){     //判断title字符长度是否超过MaxWidth
+        width = MaxWidth + 24;      //如果超过了MaxWidth，按钮长度=MaxWidth+24
+    }else if ( width < MinWidth ){      //判断title字符长度小于MinWidth
+        width = MinWidth + 24;            //如果小于MinWidth，按钮长度=MinWidth+24
+    }else{
+        width += 24;            //其他情况，直接给字符宽度+24
+    }
+    return width;
 }
 
 - (void)didClickBtn:(UIButton*)sender{
