@@ -17,7 +17,7 @@ TODO: Add long description of the pod here.
   s.homepage         = 'https://github.com/xzx951753/ZXFilterView'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'xzx951753' => '285644797@qq.com' }
-  s.source           = { :git => 'https://github.com/xzx951753/ZXFilterView.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/xzx951753/ZXFilterView.git' }
 
 
   s.ios.deployment_target = '8.0'
