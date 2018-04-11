@@ -5,6 +5,9 @@
     3. 每选中一个button将会触发一次block回调。  
     4. 支持横竖屏切换。  
 
+# IntroduceAnimation
+![IntroduceAnimation](https://raw.githubusercontent.com/xzx951753/ZXFilterView/master/ezgif.com-video-to-gif.gif "IntroduceAnimation")
+
 ## Example
 ```Objective-C
 - (void)viewDidLoad
