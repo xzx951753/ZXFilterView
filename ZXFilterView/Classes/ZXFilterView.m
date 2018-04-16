@@ -25,7 +25,8 @@
 @property (nonatomic,strong) filterBlock block;
 @property (nonatomic,strong) NSMutableDictionary* dict;
 @property (nonatomic,strong) NSMutableDictionary* cellIdentifierDict;
-
+@property (nonatomic,strong) NSMutableArray* cellArray;
+@property (nonatomic,strong) NSMutableArray* tempArray;
 @end
 
 @implementation ZXFilterView
@@ -47,6 +48,8 @@
         self.delegate = self;
         self.dataSource = self;
         self.backgroundColor = [UIColor whiteColor];
+        self.showsVerticalScrollIndicator = NO;
+        self.showsHorizontalScrollIndicator = NO;
         
         [self registerClass:[ZXFilterHeaderView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
         
@@ -171,6 +174,8 @@
     self.maskView.hidden = YES;
     self.dict = nil;
     self.cellIdentifierDict = nil;
+    self.cellArray = nil;
+    self.tempArray = nil;
     [self reloadData];
 }
 
@@ -214,6 +219,44 @@
 
     
     /*
+     version : 0.1.3
+     解决某个组因cell过多，划出屏幕时，消失的cell会被释放掉，所以将所有cell存入数组。
+     使用嵌套数组，cellArray存放了model.buttonValues.count个数组, groupArray和每个section的cell顺序一一对应
+     Start:
+     */
+    if ( _cellArray == nil ){
+        _cellArray = [NSMutableArray array];
+    }
+    
+    if ( _tempArray == nil ){
+        _tempArray = [NSMutableArray array];
+    }
+    
+    //遍历_cellArray,查找当前cell是否在_cellArray中存在
+    NSInteger find = 0;
+    for ( NSArray* group in _cellArray ){
+        for ( ZXFilterCell* item in group ){
+            if ( [cell isEqual:item] ){
+                find += 1;
+            }
+        }
+    }
+
+    if ( find == 0 ){
+        [_tempArray addObject:cell];
+        if ( indexPath.row == model.buttonValues.count - 1 ){
+            [_cellArray addObject:_tempArray];
+            _tempArray = nil;
+        }
+    }
+    /*********** :End *************/
+
+
+    
+    /************ :End ***********/
+    
+    
+    /*
         点击子按钮时，触发该block
      Start:
      */
@@ -234,8 +277,10 @@
             for ( NSInteger count = 0 ; count < model.buttonValues.count ; count++ ){
                 //创建当前选中的cell的indexPath, 并用它获取当前选中的cell
                 NSIndexPath* otherIndexPath = [NSIndexPath indexPathForRow:count inSection:filterCell.indexPath.section];
-                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
-                if ( count == filterCell.indexPath.row ){
+//                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
+                /* 0.1.2 修正：使用本地cellArray方式取出本组cell进行循环递归*/
+                ZXFilterCell* otherCell = self.cellArray[otherIndexPath.section][otherIndexPath.row];
+                if ( count == filterCell.indexPath.row ){   //被选中的按钮
                     if ( otherCell.isSelected ){
                         //当前otherCell.isSelected状态为YES时候，说明点击前为选中状态，应该要置空dict
                         [self.dict removeObjectForKey:model.groupName];
@@ -252,7 +297,9 @@
             for ( NSInteger count = 0 ; count < model.buttonValues.count ; count++ ){
                 //创建当前选中的cell的indexPath, 并用它获取当前选中的cell
                 NSIndexPath* otherIndexPath = [NSIndexPath indexPathForRow:count inSection:filterCell.indexPath.section];
-                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
+//                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
+                /* 0.1.2 修正：使用本地cellArray方式取出本组cell进行循环递归*/
+                ZXFilterCell* otherCell = self.cellArray[otherIndexPath.section][otherIndexPath.row];
                 if ( count == filterCell.indexPath.row ){
                     //从字典中取出数组
                     NSMutableArray* mArray = [self.dict objectForKey:model.groupName];
@@ -280,6 +327,7 @@
         self.resetBtn.enabled = YES;
     };
     /************ :End ************/
+
     return cell;
 }
 
@@ -309,6 +357,8 @@
 - (void)reload{
     self.dict = nil;
     self.cellIdentifierDict = nil;
+    self.cellArray = nil;
+    self.tempArray = nil;
     [self reloadData];
     self.block(self.dict);
 }

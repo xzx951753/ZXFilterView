@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZXFilterView'
-  s.version          = '0.1.0'
+  s.version          = '0.1.3'
   s.summary          = '一个OC右弹出的筛选菜单，支持多group，自适应按钮大小排列'
   s.description      = <<-DESC
 TODO: Add long description of the pod here.

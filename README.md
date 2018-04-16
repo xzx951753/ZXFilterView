@@ -8,6 +8,11 @@
 # IntroduceAnimation
 ![IntroduceAnimation](https://raw.githubusercontent.com/xzx951753/ZXFilterView/master/ezgif.com-video-to-gif.gif "IntroduceAnimation")
 
+
+# Update
+0.1.3  
+解决某个组因cell过多，划出屏幕时，消失的cell会被释放掉，将所有cell存入数组, 点击按钮时，直接从数组中取出cell
+
 ## Example
 ```Objective-C
 - (void)viewDidLoad
