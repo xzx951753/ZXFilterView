@@ -5,15 +5,15 @@
     3. 每选中一个button将会触发一次block回调。  
     4. 支持横竖屏切换。  
 
-# IntroduceAnimation
+# 示例动画
 ![IntroduceAnimation](https://raw.githubusercontent.com/xzx951753/ZXFilterView/master/ezgif.com-video-to-gif.gif "IntroduceAnimation")
 
 
-# Update
+# 更新
 0.1.3  
 解决某个组因cell过多，划出屏幕时，消失的cell会被释放掉，将所有cell存入数组, 点击按钮时，直接从数组中取出cell
 
-## Example
+## 示例代码
 ```Objective-C
 - (void)viewDidLoad
 {
@@ -93,17 +93,15 @@
 }
 ```
 
-## Installation
-
-ZXFilterView is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+## 安装
+已上传到trunk ，可使用pod安装
 
 ```ruby
 pod 'ZXFilterView'
 ```
 
 ## Author
-
+如发现问题，欢迎提交给我!!
 xzx951753, 285644797@qq.com
 
 ## License

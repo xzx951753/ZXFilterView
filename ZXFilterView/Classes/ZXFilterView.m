@@ -38,7 +38,6 @@
     layout.headerReferenceSize = CGSizeMake( _containerView.frame.size.width,34);   //headerSize
     layout.estimatedItemSize = CGSizeMake(100, 0);       //cell的预估大小，cell的宽高不会小于这个数值
     layout.sectionInset = UIEdgeInsetsMake(10, 20, 10, 20);     //collectionView的外边距
-    self.collectionViewLayout = layout;
 
     
     if ( self = [super initWithFrame:CGRectZero collectionViewLayout:layout] ){
