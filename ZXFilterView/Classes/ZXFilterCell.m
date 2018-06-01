@@ -94,11 +94,11 @@
     if ( self.block ){
         self.block(self);
     }
-    if ( self.isSelected ){
-        self.selected = NO;
-    }else{
-        self.selected = YES;
-    }
+//    if ( self.isSelected ){
+//        self.selected = NO;
+//    }else{
+//        self.selected = YES;
+//    }
 }
 
 

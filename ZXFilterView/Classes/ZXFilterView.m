@@ -23,10 +23,10 @@
 @property (nonatomic,weak) UIButton* finishBtn;
 @property (nonatomic,assign) BOOL isCheckBox;
 @property (nonatomic,strong) filterBlock block;
-@property (nonatomic,strong) NSMutableDictionary* dict;
-@property (nonatomic,strong) NSMutableDictionary* cellIdentifierDict;
-@property (nonatomic,strong) NSMutableArray* cellArray;
-@property (nonatomic,strong) NSMutableArray* tempArray;
+@property (nonatomic,strong) NSMutableDictionary* cellOptionsCacheDict;
+@property (nonatomic,strong) NSMutableDictionary* cellIdentifiersCacheDict;
+@property (nonatomic,strong) NSMutableArray* cellCacheArray;
+@property (nonatomic,strong) NSMutableArray* cellTempArray;
 @end
 
 @implementation ZXFilterView
@@ -171,10 +171,8 @@
     self.maskView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:1.0];
     [self.maskView layoutIfNeeded];
     self.maskView.hidden = YES;
-    self.dict = nil;
-    self.cellIdentifierDict = nil;
-    self.cellArray = nil;
-    self.tempArray = nil;
+    [self.cellOptionsCacheDict removeAllObjects];
+    [self.cellIdentifiersCacheDict removeAllObjects];
     [self reloadData];
 }
 
@@ -195,15 +193,15 @@
         通过不同的identifier把cell的内存地址固定住
         start
      **/
-    if ( _cellIdentifierDict == nil ) {
-        _cellIdentifierDict = [NSMutableDictionary dictionary];
+    if ( _cellIdentifiersCacheDict == nil ) {
+        _cellIdentifiersCacheDict = [NSMutableDictionary dictionary];
     }
 
-    NSString *identifier = [_cellIdentifierDict objectForKey:[NSString stringWithFormat:@"%@", indexPath]];
+    NSString *identifier = [_cellIdentifiersCacheDict objectForKey:[NSString stringWithFormat:@"%@", indexPath]];
     
     if(identifier == nil){
         identifier = [NSString stringWithFormat:@"selectedBtn%@", [NSString stringWithFormat:@"%@", indexPath]];
-        [_cellIdentifierDict setObject:identifier forKey:[NSString  stringWithFormat:@"%@",indexPath]];
+        [_cellIdentifiersCacheDict setObject:identifier forKey:[NSString  stringWithFormat:@"%@",indexPath]];
         // 注册Cell
         [collectionView registerClass:[ZXFilterCell class] forCellWithReuseIdentifier:identifier];
     }
@@ -223,17 +221,17 @@
      使用嵌套数组，cellArray存放了model.buttonValues.count个数组, groupArray和每个section的cell顺序一一对应
      Start:
      */
-    if ( _cellArray == nil ){
-        _cellArray = [NSMutableArray array];
+    if ( _cellCacheArray == nil ){
+        _cellCacheArray = [NSMutableArray array];
     }
     
-    if ( _tempArray == nil ){
-        _tempArray = [NSMutableArray array];
+    if ( _cellTempArray == nil ){
+        _cellTempArray = [NSMutableArray array];
     }
     
-    //遍历_cellArray,查找当前cell是否在_cellArray中存在
-    NSInteger find = 0;
-    for ( NSArray* group in _cellArray ){
+    //遍历_cellCacheArray,查找当前cell是否在_cellCacheArray中存在
+    NSInteger find = 0;     //find = 重复存在的次数
+    for ( NSArray* group in _cellCacheArray ){
         for ( ZXFilterCell* item in group ){
             if ( [cell isEqual:item] ){
                 find += 1;
@@ -242,10 +240,10 @@
     }
 
     if ( find == 0 ){
-        [_tempArray addObject:cell];
+        [_cellTempArray addObject:cell];
         if ( indexPath.row == model.buttonValues.count - 1 ){
-            [_cellArray addObject:_tempArray];
-            _tempArray = nil;
+            [_cellCacheArray addObject:_cellTempArray];
+            _cellTempArray = nil;
         }
     }
     /*********** :End *************/
@@ -260,69 +258,11 @@
      Start:
      */
     cell.block = ^(ZXFilterCell *filterCell) {
-        
         //锁定重置按键
         self.resetBtn.enabled = NO;
-        
-        //取出filterCell.indexPath.section所对应的数据模型
-        ZXFilterViewModel* model = self.subOptions[filterCell.indexPath.section];
-
-        if ( self.dict == nil ){
-            self.dict = [NSMutableDictionary dictionary];
-        }
-
-        //判断是否为复选框，如果非复选框，则置弹起其他按钮。
-        if ( !model.isCheckBox ){
-            for ( NSInteger count = 0 ; count < model.buttonValues.count ; count++ ){
-                //创建当前选中的cell的indexPath, 并用它获取当前选中的cell
-                NSIndexPath* otherIndexPath = [NSIndexPath indexPathForRow:count inSection:filterCell.indexPath.section];
-//                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
-                /* 0.1.2 修正：使用本地cellArray方式取出本组cell进行循环递归*/
-                ZXFilterCell* otherCell = self.cellArray[otherIndexPath.section][otherIndexPath.row];
-                if ( count == filterCell.indexPath.row ){   //被选中的按钮
-                    if ( otherCell.isSelected ){
-                        //当前otherCell.isSelected状态为YES时候，说明点击前为选中状态，应该要置空dict
-                        [self.dict removeObjectForKey:model.groupName];
-                    }else{
-                        [self.dict setObject:model.buttonValues[filterCell.indexPath.row] forKey:model.groupName];
-                    }
-                }else{
-                    //其他的cell,设置为非选中状态
-                    otherCell.selected = NO;
-                }
-            }
-        }else{
-            //复选框,先遍历所有按钮，把cell.isSelected=YES的筛选出来
-            for ( NSInteger count = 0 ; count < model.buttonValues.count ; count++ ){
-                //创建当前选中的cell的indexPath, 并用它获取当前选中的cell
-                NSIndexPath* otherIndexPath = [NSIndexPath indexPathForRow:count inSection:filterCell.indexPath.section];
-//                ZXFilterCell* otherCell = (ZXFilterCell*)[collectionView cellForItemAtIndexPath:otherIndexPath];
-                /* 0.1.2 修正：使用本地cellArray方式取出本组cell进行循环递归*/
-                ZXFilterCell* otherCell = self.cellArray[otherIndexPath.section][otherIndexPath.row];
-                if ( count == filterCell.indexPath.row ){
-                    //从字典中取出数组
-                    NSMutableArray* mArray = [self.dict objectForKey:model.groupName];
-                    if ( mArray == nil ){
-                        mArray = [NSMutableArray array];
-                    }
-                    if ( otherCell.isSelected ){
-                        //当前otherCell.isSelected状态为YES时候，说明点击前为选中状态，应该要从dict中删除该cell的value
-                        //遍历数组,如果数组中存在和当前otherCell.value相同的值，则从数组中删除
-                        for ( NSInteger count = 0 ; count < mArray.count ; count++ ){
-                            NSString* val = mArray[count];
-                            if ( [val isEqualToString:otherCell.value] ){
-                                [mArray removeObjectAtIndex:count];
-                            }
-                        }
-                    }else{
-                        [mArray addObject:otherCell.value];
-                    }
-                    //把数组回写到dict
-                    [self.dict setObject:mArray forKey:model.groupName];
-                }
-            }
-        }
-        self.block(self.dict);
+        //选中按钮由didSelectItem方法处理
+        [self didSelectItem:filterCell];
+        //接触重置锁定按钮
         self.resetBtn.enabled = YES;
     };
     /************ :End ************/
@@ -330,6 +270,61 @@
     return cell;
 }
 
+
+- (void)didSelectItem:(ZXFilterCell*)cell{
+    
+    //判断cell缓存数组是否越界，防止崩溃
+    if ( cell.indexPath.section > _cellCacheArray.count ){
+        return ;
+    }
+    
+    //cell选项缓存
+    if ( self.cellOptionsCacheDict == nil ){
+        self.cellOptionsCacheDict = [NSMutableDictionary dictionary];
+    }
+
+    //组模型
+    ZXFilterViewModel* model = (ZXFilterViewModel*)self.subOptions[cell.indexPath.section];
+    
+    //保存按钮旧状态
+    BOOL tempSelectStatus = cell.isSelected;
+    
+    if ( model.isCheckBox ){ //复选
+        //从字典中取出数组
+        NSMutableArray* mArray = [self.cellOptionsCacheDict objectForKey:model.groupName];
+        if ( mArray == nil ){
+            mArray = [NSMutableArray array];
+        }
+        
+        if ( tempSelectStatus ){  //当前isSelected状态为YES时候，说明点击前为选中状态，应该要从dict中删除该cell的value
+            cell.selected = NO;
+        //遍历数组,如果数组中存在和当前otherCell.value相同的值，则从数组中删除
+            for ( NSInteger count = 0 ; count < mArray.count ; count++ ){
+                NSString* val = mArray[count];
+                if ( [val isEqualToString:cell.value] ){
+                    [mArray removeObjectAtIndex:count];
+                }
+            }
+        }else{
+            cell.selected = YES;
+            [mArray addObject:cell.value];
+        }
+        [self.cellOptionsCacheDict setObject:mArray forKey:model.groupName];
+    }else{ //单选
+        for ( ZXFilterCell* item in _cellCacheArray[cell.indexPath.section] ){
+            item.selected = NO;
+        }
+        
+        if ( tempSelectStatus ){
+            cell.selected = NO;
+            [self.cellOptionsCacheDict removeObjectForKey:model.groupName];
+        }else{
+            cell.selected = YES;
+            [self.cellOptionsCacheDict setObject:model.buttonValues[cell.indexPath.row] forKey:model.groupName];
+        }
+    }
+    self.block(self.cellOptionsCacheDict);
+}
 
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
@@ -354,12 +349,10 @@
 
 /*重新加载*/
 - (void)reload{
-    self.dict = nil;
-    self.cellIdentifierDict = nil;
-    self.cellArray = nil;
-    self.tempArray = nil;
+    [self.cellOptionsCacheDict removeAllObjects];
+    [self.cellIdentifiersCacheDict removeAllObjects];
     [self reloadData];
-    self.block(self.dict);
+    self.block(self.cellOptionsCacheDict);
 }
 
 /*重置按钮*/
