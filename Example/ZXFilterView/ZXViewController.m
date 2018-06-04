@@ -32,7 +32,7 @@
      Start:
      */
     NSMutableArray* mArray = [NSMutableArray array];        //mArray用于存储ZXFilterCellModel
-    for ( NSInteger groupCount = 0 ; groupCount < 13 ; groupCount++ ){
+    for ( NSInteger groupCount = 0 ; groupCount < 5 ; groupCount++ ){
         NSMutableDictionary* mDict = [NSMutableDictionary dictionary];
         NSMutableArray* buttonNames = [NSMutableArray array];
         NSMutableArray* buttonVals = [NSMutableArray array];
@@ -40,7 +40,7 @@
         //设置组名
         [mDict setObject:[NSString stringWithFormat:@"group%ld",groupCount] forKey:@"groupName"];
 
-        for ( NSInteger buttonCount = 0 ; buttonCount < 104 ; buttonCount++ ){   //外循环3次，创建groupCound个group，每组group14个按钮
+        for ( NSInteger buttonCount = 0 ; buttonCount < 15; buttonCount++ ){   //外循环3次，创建groupCound个group，每组group14个按钮
             [buttonNames addObject:[NSString stringWithFormat:@"Button%ld",buttonCount]];
             [buttonVals addObject:[NSString stringWithFormat:@"%ld",buttonCount]];
         }
