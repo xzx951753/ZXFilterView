@@ -32,10 +32,16 @@
         [self createAutoLayout];
         [self judgeStatus];
         
-        //安装重置按钮通知
+        //安装重置按钮通知,收到通知后，清空cell状态
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(resetNotificationHander)
                                                      name:@"ZXFilterViewReset"
+                                                   object:nil];
+        
+        //安装点击事件通知
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(boundNotificationHander:)
+                                                     name:@"ZXFilterViewBound"
                                                    object:nil];
     }
     return self;
@@ -45,6 +51,24 @@
 - (void)resetNotificationHander{
     //设置重置状态标识
     _isReloading = YES;
+}
+
+//收到点击事件的通知
+- (void)boundNotificationHander:(NSNotification*)notic{
+    /*选中cell后，所有按钮都会收到同通知，对比notic.objcect，如果是通知自己则处理block, 不是通知自己的则弹起按钮*/
+    ZXFilterCell* noticCell = (ZXFilterCell*)notic.object;
+    if ( noticCell.indexPath.section == self.indexPath.section ){
+        if ( [self isEqual:noticCell] ){
+            self.selected = self.isSelected ? NO : YES;
+            if ( self.block ){
+                self.block(self);
+            }
+        }else{
+            if ( !self.isCheckBox ){
+                self.selected = NO;
+            }
+        }
+    }
 }
 
 - (void)createAutoLayout{
@@ -91,14 +115,9 @@
 }
 
 - (void)didClickBtn:(UIButton*)sender{
-    if ( self.block ){
-        self.block(self);
-    }
-//    if ( self.isSelected ){
-//        self.selected = NO;
-//    }else{
-//        self.selected = YES;
-//    }
+    //向所有cell发送通知,把当前点击的cell作为对象发出
+    NSNotification * notice = [NSNotification notificationWithName:@"ZXFilterViewBound" object:self];
+    [[NSNotificationCenter defaultCenter] postNotification:notice];
 }
 
 
@@ -127,4 +146,7 @@
     }
 }
 
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 @end

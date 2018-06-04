@@ -16,6 +16,7 @@ typedef void(^cellBlock) (ZXFilterCell* filterCell);
 @property (nonatomic,copy) NSString* value;
 @property (nonatomic,strong) cellBlock block;
 @property (nonatomic,strong) NSIndexPath* indexPath;
-@property (nonatomic,assign) BOOL ifCellSelected;
+@property (nonatomic,assign) BOOL isCheckBox;
+@property (nonatomic,copy) NSString* groupName;
 
 @end

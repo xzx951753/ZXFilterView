@@ -32,7 +32,7 @@
      Start:
      */
     NSMutableArray* mArray = [NSMutableArray array];        //mArray用于存储ZXFilterCellModel
-    for ( NSInteger groupCount = 0 ; groupCount < 4 ; groupCount++ ){
+    for ( NSInteger groupCount = 0 ; groupCount < 13 ; groupCount++ ){
         NSMutableDictionary* mDict = [NSMutableDictionary dictionary];
         NSMutableArray* buttonNames = [NSMutableArray array];
         NSMutableArray* buttonVals = [NSMutableArray array];
